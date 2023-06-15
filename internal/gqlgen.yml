@@ -4,8 +4,8 @@ schema:
 
 # Where should the generated server code go?
 exec:
-  filename: gql_schema.go
-  package: internal
+  filename: graphql/schema.go
+  package: graphql
 
 # Uncomment to enable federation
 # federation:
@@ -63,8 +63,8 @@ resolver:
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
 autobind:
-  - "github.com/pulkitbhardwaj/alpha/matrix/internal"
-  - "github.com/pulkitbhardwaj/alpha/matrix/internal/user"
+  - "github.com/pulkitbhardwaj/matrix/internal"
+  - "github.com/pulkitbhardwaj/matrix/internal/user"
 
 # This section declares type mapping between the GraphQL and go type systems
 #

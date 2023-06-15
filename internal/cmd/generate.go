@@ -10,6 +10,8 @@ import (
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
+	"github.com/99designs/gqlgen/api"
+	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/spf13/cobra"
 )
 
@@ -32,13 +34,22 @@ to quickly create a Cobra application.`,
 			entgql.WithWhereInputs(true),
 			entgql.WithSchemaGenerator(),
 			entgql.WithConfigPath("./internal/gqlgen.yml"),
-			entgql.WithSchemaPath("./internal/internal.graphql"),
+			entgql.WithSchemaPath("./internal/graph.graphql"),
 		)
 		if err != nil {
 			log.Fatalf("creating entgql extension: %v", err)
 		}
 		if err := entc.Generate("./internal/schema", &gen.Config{}, entc.Extensions(ex)); err != nil {
 			log.Fatalf("running ent codegen: %v", err)
+		}
+
+		cfg, err := config.LoadConfig("./internal/gqlgen.yml")
+		if err != nil {
+			log.Fatalf("creating gqlgen extension: %v", err)
+		}
+
+		if err = api.Generate(cfg); err != nil {
+			log.Fatalf("running gqlgen codegen: %v", err)
 		}
 	},
 }
