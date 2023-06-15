@@ -8,7 +8,9 @@ import (
 var Module = fx.Module("runtime",
 	fx.Provide(
 		SQLStore,
-		HTTPServer,
 		handler.NewDefaultServer,
+	),
+	fx.Invoke(
+		HTTPServer,
 	),
 )

@@ -17,7 +17,7 @@ import (
 	"github.com/pulkitbhardwaj/matrix/internal"
 )
 
-func HTTPServer(lc fx.Lifecycle, gql *handler.Server, db *internal.Client) *http.Server {
+func HTTPServer(lc fx.Lifecycle, gql *handler.Server, db *internal.Client) {
 
 	// Create Router
 	mux := chi.NewRouter()
@@ -61,6 +61,4 @@ func HTTPServer(lc fx.Lifecycle, gql *handler.Server, db *internal.Client) *http
 			return srv.Shutdown(ctx)
 		},
 	})
-
-	return srv
 }
