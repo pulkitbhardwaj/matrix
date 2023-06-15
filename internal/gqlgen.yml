@@ -87,8 +87,4 @@ models:
 
   Node:
     model:
-      - github.com/pulkitbhardwaj/alpha/net/social/internal.Noder
-
-  Address:
-    model:
-      - github.com/pulkitbhardwaj/alpha/net/social/internal/schema.Adress
+      - github.com/pulkitbhardwaj/matrix/internal.Noder
