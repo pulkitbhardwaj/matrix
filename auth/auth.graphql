@@ -1,0 +1,10 @@
+# directive @auth
+
+input SignUpInput {
+	firstName: String!
+	lastName: String!
+}
+
+type Mutation {
+	signUp(input: SignUpInput): User
+}

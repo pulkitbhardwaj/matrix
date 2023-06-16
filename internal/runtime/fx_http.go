@@ -40,6 +40,7 @@ func HTTPServer(lc fx.Lifecycle, gql *handler.Server, db *internal.Client) {
 	mux.Method(http.MethodGet,
 		"/", playground.Handler("GraphQL Playground", "/"),
 	)
+	mux.Get()
 
 	// Create server
 	srv := &http.Server{
