@@ -5,17 +5,18 @@ package runtime
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/pulkitbhardwaj/matrix/internal"
 )
 
 func (r *queryResolver) Node(ctx context.Context, id uuid.UUID) (internal.Noder, error) {
-	return r.State.Noder(ctx, id)
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) Nodes(ctx context.Context, ids []uuid.UUID) ([]internal.Noder, error) {
-	return r.State.Noders(ctx, ids)
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Query returns internal.QueryResolver implementation.

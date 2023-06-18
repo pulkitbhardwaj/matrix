@@ -11,9 +11,9 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
+	"go.uber.org/fx"
 
 	"github.com/pulkitbhardwaj/matrix/internal"
-	"go.uber.org/fx"
 )
 
 type GQLParams struct {
