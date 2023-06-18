@@ -20,8 +20,8 @@ type GQLParams struct {
 	fx.In
 
 	Router   chi.Router
+	TxOpener internal.State
 	Schema   graphql.ExecutableSchema
-	TxOpener *internal.Client
 }
 
 func NewGQLHandler(p GQLParams) {

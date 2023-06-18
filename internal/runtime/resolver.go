@@ -12,7 +12,7 @@ import (
 type Resolver struct {
 	fx.In
 
-	State *internal.Client
+	State internal.State
 }
 
 func NewGQLConfig(r Resolver) internal.Config {
