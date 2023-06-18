@@ -1,31 +1,31 @@
-package graphql
+package runtime
 
 import (
-	"net/http"
 	"time"
 
+	"entgo.io/contrib/entgql"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
 
 	"github.com/pulkitbhardwaj/matrix/internal"
+	"go.uber.org/fx"
 )
 
-type Handler struct {
-	mux   *chi.Mux
-	state *internal.Client
-	es    graphql.ExecutableSchema
+type GQLParams struct {
+	fx.In
+
+	Router   chi.Router
+	Schema   graphql.ExecutableSchema
+	TxOpener *internal.Client
 }
 
-func (h *Handler) init() {
-
-}
-
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	srv := handler.New(h.es)
+func NewGQLHandler(p GQLParams) {
+	srv := handler.New(p.Schema)
 
 	srv.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 10 * time.Second,
@@ -41,6 +41,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	srv.Use(extension.AutomaticPersistedQuery{
 		Cache: lru.New(100),
 	})
+	srv.Use(entgql.Transactioner{TxOpener: p.TxOpener})
 
-	return srv
+	p.Router.Post("/", srv.ServeHTTP)
+	p.Router.Get("/", playground.Handler("GraphQL Playground", "/"))
 }

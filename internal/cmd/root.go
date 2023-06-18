@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/fx"
 
-	"github.com/pulkitbhardwaj/matrix/internal/graphql"
+	"github.com/pulkitbhardwaj/matrix/internal"
 	"github.com/pulkitbhardwaj/matrix/internal/runtime"
 )
 
@@ -27,7 +27,7 @@ to quickly create a Cobra application.`,
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 		fx.New(
-			graphql.Module,
+			internal.Module,
 			runtime.Module,
 		).
 			Run()

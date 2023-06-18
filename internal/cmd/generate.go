@@ -26,26 +26,31 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("generate called")
+		fmt.Println("Generate Application Internal State")
+
+		gqlCfg := "./internal/runtime/graphql.yml"
 
 		ex, err := entgql.NewExtension(
 			entgql.WithRelaySpec(true),
 			entgql.WithNodeDescriptor(true),
 			entgql.WithWhereInputs(true),
 			entgql.WithSchemaGenerator(),
-			entgql.WithConfigPath("./internal/gqlgen.yml"),
-			entgql.WithSchemaPath("./internal/graph.graphql"),
+			entgql.WithConfigPath(gqlCfg),
+			entgql.WithSchemaPath("./internal/node.graphql"),
 		)
 		if err != nil {
 			log.Fatalf("creating entgql extension: %v", err)
 		}
-		if err := entc.Generate("./internal/schema", &gen.Config{}, entc.Extensions(ex)); err != nil {
+		if err := entc.Generate("./internal/schema", &gen.Config{
+			Templates: entgql.AllTemplates,
+			Features:  []gen.Feature{gen.FeatureVersionedMigration},
+		}, entc.Extensions(ex)); err != nil {
 			log.Fatalf("running ent codegen: %v", err)
 		}
 
-		cfg, err := config.LoadConfig("./internal/gqlgen.yml")
+		cfg, err := config.LoadConfig(gqlCfg)
 		if err != nil {
-			log.Fatalf("creating gqlgen extension: %v", err)
+			log.Fatalf("loading gqlgen config: %v", err)
 		}
 
 		if err = api.Generate(cfg); err != nil {
