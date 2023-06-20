@@ -1,4 +1,4 @@
-package runtime
+package graphql
 
 import (
 	"time"
@@ -21,7 +21,7 @@ type GQLParams struct {
 	Schema graphql.ExecutableSchema
 }
 
-func NewGQLHandler(p GQLParams) {
+func Handler(p GQLParams) {
 	srv := handler.New(p.Schema)
 
 	srv.AddTransport(transport.Websocket{

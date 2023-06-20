@@ -1,4 +1,4 @@
-package runtime
+package http
 
 import (
 	"github.com/go-chi/chi/v5"
@@ -6,7 +6,7 @@ import (
 	"github.com/rs/cors"
 )
 
-func NewMuxRouter() chi.Router {
+func NewRouter() chi.Router {
 	mux := chi.NewRouter()
 
 	mux.Use(middleware.Logger)

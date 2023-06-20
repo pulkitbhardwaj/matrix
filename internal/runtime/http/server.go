@@ -1,4 +1,4 @@
-package runtime
+package http
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"go.uber.org/fx"
 )
 
-func NewHTTPServer(lc fx.Lifecycle, mux chi.Router) {
+func Server(lc fx.Lifecycle, mux chi.Router) {
 	// Create server
 	server := &http.Server{
 		Addr:    ":8080",
