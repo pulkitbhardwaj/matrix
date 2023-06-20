@@ -28,8 +28,10 @@ type User struct {
 	LastName string `json:"last_name,omitempty"`
 	// EmailAddress holds the value of the "email_address" field.
 	EmailAddress string `json:"email_address,omitempty"`
-	// UserName holds the value of the "user_name" field.
-	UserName string `json:"user_name,omitempty"`
+	// AccountAddress holds the value of the "account_address" field.
+	AccountAddress string `json:"account_address,omitempty"`
+	// Alias holds the value of the "alias" field.
+	Alias string `json:"alias,omitempty"`
 	// Bio holds the value of the "bio" field.
 	Bio string `json:"bio,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -44,14 +46,20 @@ type UserEdges struct {
 	Followers []*User `json:"followers,omitempty"`
 	// Following holds the value of the following edge.
 	Following []*User `json:"following,omitempty"`
+	// Posts holds the value of the posts edge.
+	Posts []*Post `json:"posts,omitempty"`
+	// Groups holds the value of the groups edge.
+	Groups []*Group `json:"groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [4]bool
 	// totalCount holds the count of the edges above.
-	totalCount [2]map[string]int
+	totalCount [4]map[string]int
 
 	namedFollowers map[string][]*User
 	namedFollowing map[string][]*User
+	namedPosts     map[string][]*Post
+	namedGroups    map[string][]*Group
 }
 
 // FollowersOrErr returns the Followers value or an error if the edge
@@ -72,12 +80,30 @@ func (e UserEdges) FollowingOrErr() ([]*User, error) {
 	return nil, &NotLoadedError{edge: "following"}
 }
 
+// PostsOrErr returns the Posts value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) PostsOrErr() ([]*Post, error) {
+	if e.loadedTypes[2] {
+		return e.Posts, nil
+	}
+	return nil, &NotLoadedError{edge: "posts"}
+}
+
+// GroupsOrErr returns the Groups value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) GroupsOrErr() ([]*Group, error) {
+	if e.loadedTypes[3] {
+		return e.Groups, nil
+	}
+	return nil, &NotLoadedError{edge: "groups"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldFirstName, user.FieldLastName, user.FieldEmailAddress, user.FieldUserName, user.FieldBio:
+		case user.FieldFirstName, user.FieldLastName, user.FieldEmailAddress, user.FieldAccountAddress, user.FieldAlias, user.FieldBio:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -134,11 +160,17 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.EmailAddress = value.String
 			}
-		case user.FieldUserName:
+		case user.FieldAccountAddress:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field user_name", values[i])
+				return fmt.Errorf("unexpected type %T for field account_address", values[i])
 			} else if value.Valid {
-				u.UserName = value.String
+				u.AccountAddress = value.String
+			}
+		case user.FieldAlias:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field alias", values[i])
+			} else if value.Valid {
+				u.Alias = value.String
 			}
 		case user.FieldBio:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -167,6 +199,16 @@ func (u *User) QueryFollowers() *UserQuery {
 // QueryFollowing queries the "following" edge of the User entity.
 func (u *User) QueryFollowing() *UserQuery {
 	return NewUserClient(u.config).QueryFollowing(u)
+}
+
+// QueryPosts queries the "posts" edge of the User entity.
+func (u *User) QueryPosts() *PostQuery {
+	return NewUserClient(u.config).QueryPosts(u)
+}
+
+// QueryGroups queries the "groups" edge of the User entity.
+func (u *User) QueryGroups() *GroupQuery {
+	return NewUserClient(u.config).QueryGroups(u)
 }
 
 // Update returns a builder for updating this User.
@@ -207,8 +249,11 @@ func (u *User) String() string {
 	builder.WriteString("email_address=")
 	builder.WriteString(u.EmailAddress)
 	builder.WriteString(", ")
-	builder.WriteString("user_name=")
-	builder.WriteString(u.UserName)
+	builder.WriteString("account_address=")
+	builder.WriteString(u.AccountAddress)
+	builder.WriteString(", ")
+	builder.WriteString("alias=")
+	builder.WriteString(u.Alias)
 	builder.WriteString(", ")
 	builder.WriteString("bio=")
 	builder.WriteString(u.Bio)
@@ -261,6 +306,54 @@ func (u *User) appendNamedFollowing(name string, edges ...*User) {
 		u.Edges.namedFollowing[name] = []*User{}
 	} else {
 		u.Edges.namedFollowing[name] = append(u.Edges.namedFollowing[name], edges...)
+	}
+}
+
+// NamedPosts returns the Posts named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (u *User) NamedPosts(name string) ([]*Post, error) {
+	if u.Edges.namedPosts == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := u.Edges.namedPosts[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (u *User) appendNamedPosts(name string, edges ...*Post) {
+	if u.Edges.namedPosts == nil {
+		u.Edges.namedPosts = make(map[string][]*Post)
+	}
+	if len(edges) == 0 {
+		u.Edges.namedPosts[name] = []*Post{}
+	} else {
+		u.Edges.namedPosts[name] = append(u.Edges.namedPosts[name], edges...)
+	}
+}
+
+// NamedGroups returns the Groups named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (u *User) NamedGroups(name string) ([]*Group, error) {
+	if u.Edges.namedGroups == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := u.Edges.namedGroups[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (u *User) appendNamedGroups(name string, edges ...*Group) {
+	if u.Edges.namedGroups == nil {
+		u.Edges.namedGroups = make(map[string][]*Group)
+	}
+	if len(edges) == 0 {
+		u.Edges.namedGroups[name] = []*Group{}
+	} else {
+		u.Edges.namedGroups[name] = append(u.Edges.namedGroups[name], edges...)
 	}
 }
 

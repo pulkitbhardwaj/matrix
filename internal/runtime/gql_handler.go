@@ -3,7 +3,6 @@ package runtime
 import (
 	"time"
 
-	"entgo.io/contrib/entgql"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -12,16 +11,14 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/fx"
-
-	"github.com/pulkitbhardwaj/matrix/internal"
 )
 
 type GQLParams struct {
 	fx.In
 
-	Router   chi.Router
-	TxOpener internal.State
-	Schema   graphql.ExecutableSchema
+	Router chi.Router
+	// TxOpener internal.State
+	Schema graphql.ExecutableSchema
 }
 
 func NewGQLHandler(p GQLParams) {
@@ -41,7 +38,7 @@ func NewGQLHandler(p GQLParams) {
 	srv.Use(extension.AutomaticPersistedQuery{
 		Cache: lru.New(100),
 	})
-	srv.Use(entgql.Transactioner{TxOpener: p.TxOpener})
+	// srv.Use(entgql.Transactioner{TxOpener: p.TxOpener})
 
 	p.Router.Post("/", srv.ServeHTTP)
 	p.Router.Get("/", playground.Handler("GraphQL Playground", "/"))

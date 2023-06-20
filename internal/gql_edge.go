@@ -8,6 +8,74 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
+func (gr *Group) Users(
+	ctx context.Context, after *Cursor, first *int, before *Cursor, last *int, where *UserWhereInput,
+) (*UserConnection, error) {
+	opts := []UserPaginateOption{
+		WithUserFilter(where.Filter),
+	}
+	alias := graphql.GetFieldContext(ctx).Field.Alias
+	totalCount, hasTotalCount := gr.Edges.totalCount[0][alias]
+	if nodes, err := gr.NamedUsers(alias); err == nil || hasTotalCount {
+		pager, err := newUserPager(opts, last != nil)
+		if err != nil {
+			return nil, err
+		}
+		conn := &UserConnection{Edges: []*UserEdge{}, TotalCount: totalCount}
+		conn.build(nodes, pager, after, first, before, last)
+		return conn, nil
+	}
+	return gr.QueryUsers().Paginate(ctx, after, first, before, last, opts...)
+}
+
+func (m *Message) From(
+	ctx context.Context, after *Cursor, first *int, before *Cursor, last *int, where *MessageWhereInput,
+) (*MessageConnection, error) {
+	opts := []MessagePaginateOption{
+		WithMessageFilter(where.Filter),
+	}
+	alias := graphql.GetFieldContext(ctx).Field.Alias
+	totalCount, hasTotalCount := m.Edges.totalCount[0][alias]
+	if nodes, err := m.NamedFrom(alias); err == nil || hasTotalCount {
+		pager, err := newMessagePager(opts, last != nil)
+		if err != nil {
+			return nil, err
+		}
+		conn := &MessageConnection{Edges: []*MessageEdge{}, TotalCount: totalCount}
+		conn.build(nodes, pager, after, first, before, last)
+		return conn, nil
+	}
+	return m.QueryFrom().Paginate(ctx, after, first, before, last, opts...)
+}
+
+func (m *Message) To(
+	ctx context.Context, after *Cursor, first *int, before *Cursor, last *int, where *MessageWhereInput,
+) (*MessageConnection, error) {
+	opts := []MessagePaginateOption{
+		WithMessageFilter(where.Filter),
+	}
+	alias := graphql.GetFieldContext(ctx).Field.Alias
+	totalCount, hasTotalCount := m.Edges.totalCount[1][alias]
+	if nodes, err := m.NamedTo(alias); err == nil || hasTotalCount {
+		pager, err := newMessagePager(opts, last != nil)
+		if err != nil {
+			return nil, err
+		}
+		conn := &MessageConnection{Edges: []*MessageEdge{}, TotalCount: totalCount}
+		conn.build(nodes, pager, after, first, before, last)
+		return conn, nil
+	}
+	return m.QueryTo().Paginate(ctx, after, first, before, last, opts...)
+}
+
+func (po *Post) User(ctx context.Context) (*User, error) {
+	result, err := po.Edges.UserOrErr()
+	if IsNotLoaded(err) {
+		result, err = po.QueryUser().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
 func (u *User) Followers(
 	ctx context.Context, after *Cursor, first *int, before *Cursor, last *int, where *UserWhereInput,
 ) (*UserConnection, error) {
@@ -46,4 +114,44 @@ func (u *User) Following(
 		return conn, nil
 	}
 	return u.QueryFollowing().Paginate(ctx, after, first, before, last, opts...)
+}
+
+func (u *User) Posts(
+	ctx context.Context, after *Cursor, first *int, before *Cursor, last *int, where *PostWhereInput,
+) (*PostConnection, error) {
+	opts := []PostPaginateOption{
+		WithPostFilter(where.Filter),
+	}
+	alias := graphql.GetFieldContext(ctx).Field.Alias
+	totalCount, hasTotalCount := u.Edges.totalCount[2][alias]
+	if nodes, err := u.NamedPosts(alias); err == nil || hasTotalCount {
+		pager, err := newPostPager(opts, last != nil)
+		if err != nil {
+			return nil, err
+		}
+		conn := &PostConnection{Edges: []*PostEdge{}, TotalCount: totalCount}
+		conn.build(nodes, pager, after, first, before, last)
+		return conn, nil
+	}
+	return u.QueryPosts().Paginate(ctx, after, first, before, last, opts...)
+}
+
+func (u *User) Groups(
+	ctx context.Context, after *Cursor, first *int, before *Cursor, last *int, where *GroupWhereInput,
+) (*GroupConnection, error) {
+	opts := []GroupPaginateOption{
+		WithGroupFilter(where.Filter),
+	}
+	alias := graphql.GetFieldContext(ctx).Field.Alias
+	totalCount, hasTotalCount := u.Edges.totalCount[3][alias]
+	if nodes, err := u.NamedGroups(alias); err == nil || hasTotalCount {
+		pager, err := newGroupPager(opts, last != nil)
+		if err != nil {
+			return nil, err
+		}
+		conn := &GroupConnection{Edges: []*GroupEdge{}, TotalCount: totalCount}
+		conn.build(nodes, pager, after, first, before, last)
+		return conn, nil
+	}
+	return u.QueryGroups().Paginate(ctx, after, first, before, last, opts...)
 }

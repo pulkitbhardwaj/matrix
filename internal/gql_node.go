@@ -10,6 +10,11 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-multierror"
+	"github.com/pulkitbhardwaj/matrix/internal/group"
+	"github.com/pulkitbhardwaj/matrix/internal/message"
+	"github.com/pulkitbhardwaj/matrix/internal/notification"
+	"github.com/pulkitbhardwaj/matrix/internal/post"
+	"github.com/pulkitbhardwaj/matrix/internal/setting"
 	"github.com/pulkitbhardwaj/matrix/internal/user"
 )
 
@@ -18,6 +23,21 @@ type Noder interface {
 	Node(context.Context) (*Node, error)
 	IsNode()
 }
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *Group) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *Message) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *Notification) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *Post) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *Setting) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *User) IsNode() {}
@@ -80,6 +100,66 @@ func (c *Client) Noder(ctx context.Context, id uuid.UUID, opts ...NodeOption) (_
 
 func (c *Client) noder(ctx context.Context, table string, id uuid.UUID) (Noder, error) {
 	switch table {
+	case group.Table:
+		query := c.Group.Query().
+			Where(group.ID(id))
+		query, err := query.CollectFields(ctx, "Group")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case message.Table:
+		query := c.Message.Query().
+			Where(message.ID(id))
+		query, err := query.CollectFields(ctx, "Message")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case notification.Table:
+		query := c.Notification.Query().
+			Where(notification.ID(id))
+		query, err := query.CollectFields(ctx, "Notification")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case post.Table:
+		query := c.Post.Query().
+			Where(post.ID(id))
+		query, err := query.CollectFields(ctx, "Post")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case setting.Table:
+		query := c.Setting.Query().
+			Where(setting.ID(id))
+		query, err := query.CollectFields(ctx, "Setting")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
 	case user.Table:
 		query := c.User.Query().
 			Where(user.ID(id))
@@ -165,6 +245,86 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 		idmap[id] = append(idmap[id], &noders[i])
 	}
 	switch table {
+	case group.Table:
+		query := c.Group.Query().
+			Where(group.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "Group")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case message.Table:
+		query := c.Message.Query().
+			Where(message.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "Message")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case notification.Table:
+		query := c.Notification.Query().
+			Where(notification.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "Notification")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case post.Table:
+		query := c.Post.Query().
+			Where(post.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "Post")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case setting.Table:
+		query := c.Setting.Query().
+			Where(setting.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "Setting")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
 	case user.Table:
 		query := c.User.Query().
 			Where(user.IDIn(ids...))

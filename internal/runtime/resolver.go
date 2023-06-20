@@ -1,7 +1,6 @@
 package runtime
 
 import (
-	"github.com/pulkitbhardwaj/matrix/internal"
 	"go.uber.org/fx"
 )
 
@@ -12,5 +11,5 @@ import (
 type Resolver struct {
 	fx.In
 
-	State internal.State
+	// State internal.State
 }

@@ -20,8 +20,8 @@ model:
 # Where should the resolver implementations go?
 resolver:
   layout: follow-schema
-  dir: internal/runtime
-  package: runtime
+  dir: internal/runtime/graphql
+  package: graphql
   filename_template: "{name}_resolver.go"
   # Optional: turn on to not generate template comments above resolvers
   # omit_template_comment: false

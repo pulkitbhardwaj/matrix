@@ -28,7 +28,7 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Generate Application Internal State")
 
-		gqlCfg := "./internal/runtime/graphql.yml"
+		gqlCfg := "./internal/runtime/graphql/config.yml"
 
 		ex, err := entgql.NewExtension(
 			entgql.WithRelaySpec(true),
@@ -36,7 +36,7 @@ to quickly create a Cobra application.`,
 			entgql.WithWhereInputs(true),
 			entgql.WithSchemaGenerator(),
 			entgql.WithConfigPath(gqlCfg),
-			entgql.WithSchemaPath("./internal/node.graphql"),
+			entgql.WithSchemaPath("./internal/entity.graphql"),
 		)
 		if err != nil {
 			log.Fatalf("creating entgql extension: %v", err)

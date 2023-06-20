@@ -7,7 +7,7 @@ import (
 var Module = fx.Module("runtime",
 	fx.Provide(
 		NewSQLStore,
-		NewGQLConfig,
+		// NewGQLConfig,
 		NewMuxRouter,
 	),
 	fx.Invoke(

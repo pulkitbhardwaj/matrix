@@ -36,7 +36,10 @@ func (User) Fields() []ent.Field {
 		field.String("email_address").
 			Unique(),
 
-		field.String("user_name").
+		field.String("account_address").
+			Unique(),
+
+		field.String("alias").
 			Unique(),
 
 		field.String("bio").
@@ -52,6 +55,17 @@ func (User) Edges() []ent.Edge {
 				entgql.RelayConnection(),
 			).
 			From("followers").
+			Annotations(
+				entgql.RelayConnection(),
+			),
+
+		edge.To("posts", Post.Type).
+			Annotations(
+				entgql.RelayConnection(),
+			),
+
+		edge.From("groups", Group.Type).
+			Ref("users").
 			Annotations(
 				entgql.RelayConnection(),
 			),
